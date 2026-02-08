@@ -5,7 +5,7 @@ Scrapes [lastbottlewines.com](https://www.lastbottlewines.com), scores the curre
 ## How it works
 
 1. **Scrape** — pulls the current wine name and price from Last Bottle Wines
-2. **Filter** — checks price range and duplicate detection (SQLite)
+2. **Filter** — checks price range
 3. **Score** — sends a detailed prompt to Gemini (`gemini-2.5-flash-lite`) with your taste profile, preferred types, and price ranges → returns a 0–100 score
 4. **Notify** — if the score meets your threshold, sends an email alert with a link to buy
 
