@@ -93,6 +93,9 @@ aws events enable-rule --name lastbottlewines-hourly
 # Update user configs after editing locally
 aws s3 sync data/user_configs/ s3://lastbottlewines-data/user_configs/
 
+# Pull the database down to local
+aws s3 cp s3://lastbottlewines-data/wines.db data/wines.db
+
 # Redeploy after code changes
 ./deploy_lambda.sh
 ```
