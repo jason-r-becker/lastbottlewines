@@ -30,15 +30,10 @@ uv sync
 
 2. Edit `data/user_configs/yourname.yaml` with your wine preferences, price ranges, and email.
 
-3. Set environment variables:
+3. Create a `.env` file with your credentials (gitignored):
    ```bash
-   export GOOGLE_API_KEY="your-gemini-api-key"
-
-   # For email notifications
-   export SMTP_HOST="smtp.gmail.com"
-   export SMTP_PORT="465"
-   export SMTP_USER="you@gmail.com"
-   export SMTP_PASS="your-app-password"
+   cp .env.example .env
+   nano .env
    ```
 
 ### Run

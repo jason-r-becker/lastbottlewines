@@ -5,7 +5,9 @@ Orchestrates scraping, scoring, and database operations for tracking
 wine recommendations based on user preferences.
 """
 
+import os
 from datetime import datetime, timezone
+from pathlib import Path
 
 from lastbottlewines.scraper import scrape_last_bottle
 from lastbottlewines.scorer import score_wine, generate_wine_scoring_prompt
@@ -18,6 +20,21 @@ from lastbottlewines.log import get_logger, send_error_digest
 logger = get_logger(__name__)
 
 
+def _load_dotenv():
+    """Load .env file into environment if it exists."""
+    env_path = Path(__file__).resolve().parent.parent.parent / ".env"
+    if not env_path.exists():
+        return
+    with open(env_path) as f:
+        for line in f:
+            line = line.strip()
+            if not line or line.startswith("#"):
+                continue
+            key, _, value = line.partition("=")
+            value = value.strip('"').strip("'")
+            os.environ.setdefault(key.strip(), value)
+
+
 def main():
     """
     Main orchestration function.
@@ -25,6 +42,7 @@ def main():
     Scrapes the current wine, evaluates it against user preferences,
     scores it, and records everything in the database.
     """
+    _load_dotenv()
     timestamp = datetime.now(timezone.utc)
 
     # Scrape the current wine
