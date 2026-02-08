@@ -33,21 +33,25 @@
 
 set -euo pipefail
 
-# ---------- EDIT THESE ----------
+# ---------- Configuration ----------
 FUNCTION_NAME="lastbottlewines"
 S3_BUCKET="lastbottlewines-data"
 REGION="us-east-1"
-ROLE_ARN=""   # paste your role ARN here after step 3 above
-
 SMTP_HOST="smtp.gmail.com"
 SMTP_PORT="465"
-SMTP_USER=""  # your gmail address
-SMTP_PASS=""  # your gmail app password
-GOOGLE_API_KEY=""  # your Gemini API key
-# --------------------------------
 
-if [[ -z "$ROLE_ARN" || -z "$SMTP_USER" || -z "$SMTP_PASS" || -z "$GOOGLE_API_KEY" ]]; then
-    echo "ERROR: Fill in ROLE_ARN, SMTP_USER, SMTP_PASS, and GOOGLE_API_KEY at the top of this script."
+# Load secrets from .env file (gitignored)
+ENV_FILE="$(cd "$(dirname "$0")" && pwd)/.env"
+if [[ ! -f "$ENV_FILE" ]]; then
+    echo "ERROR: .env file not found. Create one from .env.example:"
+    echo "  cp .env.example .env"
+    echo "  nano .env"
+    exit 1
+fi
+source "$ENV_FILE"
+
+if [[ -z "${ROLE_ARN:-}" || -z "${SMTP_USER:-}" || -z "${SMTP_PASS:-}" || -z "${GOOGLE_API_KEY:-}" ]]; then
+    echo "ERROR: .env must define ROLE_ARN, SMTP_USER, SMTP_PASS, and GOOGLE_API_KEY."
     exit 1
 fi
 
@@ -83,6 +87,10 @@ else
         --no-cli-pager \
         --environment "Variables={S3_BUCKET=$S3_BUCKET,SMTP_HOST=$SMTP_HOST,SMTP_PORT=$SMTP_PORT,SMTP_USER=$SMTP_USER,SMTP_PASS=$SMTP_PASS,GOOGLE_API_KEY=$GOOGLE_API_KEY}"
 fi
+
+# --- Wait for function to be ready ---
+echo "==> Waiting for function to become Active..."
+aws lambda wait function-active-v2 --function-name "$FUNCTION_NAME" --region "$REGION"
 
 # --- Env vars (always update) ---
 echo "==> Updating environment variables"
