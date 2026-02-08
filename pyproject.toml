@@ -51,6 +51,9 @@ indent-style = "space"
 testpaths = ["tests"]
 pythonpath = ["src"]
 addopts = "-q"
+markers = [
+    "network: tests that hit external services (Gemini, SMTP, web)",
+]
 
 [tool.uv.workspace]
 members = ["lastbottlewines"]
