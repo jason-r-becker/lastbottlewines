@@ -1,0 +1,25 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+dist/
+build/
+
+# Virtual environment
+.venv/
+
+# Data — keep template, ignore everything else
+data/wines.db
+data/user_configs/*.yaml
+!data/user_configs/template.yaml
+data/logs/
+
+# IDE
+.idea/
+.vscode/
+
+# OS
+.DS_Store
+
+# Lambda build artifacts
+/tmp/lastbottlewines-lambda*

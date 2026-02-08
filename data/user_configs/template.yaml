@@ -1,0 +1,36 @@
+# lastbottlewines user config
+#
+# Copy this file and rename it (e.g. yourname.yaml) in this same directory.
+# Each YAML file here represents one user — the app scores wines for each user
+# independently based on their preferences.
+
+# Free-text description of your wine taste (sent to the LLM for scoring)
+profile: "I like bold reds and dry whites."
+
+# Wine types you're interested in
+types:
+  - Cabernet Sauvignon
+  - Chardonnay
+
+# Overall price range [min, max] in dollars
+price_range: [20, 100]
+
+# Optional per-type price overrides
+type_specific_price_ranges:
+  Cabernet Sauvignon: [30, 80]
+  Chardonnay: [20, 60]
+
+# Wines that always trigger a notification regardless of score
+always_notify_for:
+  - "Opus One"
+
+# Wines that never trigger a notification regardless of score
+never_notify_for:
+  - "Yellow Tail"
+
+# Minimum LLM score (0-100) to send an email alert
+notify_threshold: 90
+
+# Contact info for notifications
+contact:
+  email: you@example.com

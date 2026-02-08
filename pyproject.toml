@@ -1,0 +1,56 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "lastbottlewines"
+version = "1.0.0"
+# readme = "README.md"
+description = "package description"
+requires-python = ">= 3.12"
+authors = [{ name = "Jason Becker" }]
+license = { text = "MIT" }
+dependencies = [
+    "beautifulsoup4",
+    "google-genai",
+    "requests",
+    "pyyaml",
+]
+
+[project.optional-dependencies]
+dev = ["ipdb", "ipykernel", "ipython", "ipywidgets", "jupyter", "pip", "pytest"]
+lambda = ["boto3"]
+
+[project.scripts]
+lastbottlewines = "lastbottlewines.last_bottle:main"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/lastbottlewines"]
+
+[tool.hatch.build.targets.sdist]
+include = ["src/lastbottlewines", "README.md", "pyproject.toml"]
+
+[tool.ruff]
+src = ["src"]
+line-length = 79
+select = ["E", "F", "W", "I", "B"]
+
+# -------------------------------------------------------------------
+# Ruff Lint Configuration
+#   E    - pycodestyle errors: indentation, whitespace, syntax/layout issues
+#   F    - pyflakes: unused imports/variables, undefined names
+#   W    - pycodestyle warnings: blank lines, spacing, formatting
+#   I    - isort: enforces consistent import ordering and grouping
+#   B    - flake8-bugbear: flags likely bugs and common Python footguns
+# -------------------------------------------------------------------
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["src"]
+addopts = "-q"
+
+[tool.uv.workspace]
+members = ["lastbottlewines"]
