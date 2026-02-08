@@ -18,6 +18,9 @@ data/logs/
 .idea/
 .vscode/
 
+# Secrets
+.env
+
 # OS
 .DS_Store
 
