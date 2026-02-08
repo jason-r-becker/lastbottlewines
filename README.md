@@ -90,8 +90,8 @@ aws events disable-rule --name lastbottlewines-hourly
 # Resume it
 aws events enable-rule --name lastbottlewines-hourly
 
-# Update your user config after editing locally
-aws s3 cp data/user_configs/jason.yaml s3://lastbottlewines-data/user_configs/jason.yaml
+# Update user configs after editing locally
+aws s3 sync data/user_configs/ s3://lastbottlewines-data/user_configs/
 
 # Redeploy after code changes
 ./deploy_lambda.sh

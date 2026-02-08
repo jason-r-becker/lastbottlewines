@@ -91,6 +91,7 @@ fi
 # --- Wait for function to be ready ---
 echo "==> Waiting for function to become Active..."
 aws lambda wait function-active-v2 --function-name "$FUNCTION_NAME" --region "$REGION"
+aws lambda wait function-updated-v2 --function-name "$FUNCTION_NAME" --region "$REGION"
 
 # --- Env vars (always update) ---
 echo "==> Updating environment variables"
