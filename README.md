@@ -74,6 +74,34 @@ chmod +x deploy_lambda.sh
 
 See [`deploy_lambda.sh`](deploy_lambda.sh) for step-by-step instructions and [`iam_policy.json`](iam_policy.json) for the required IAM permissions.
 
+### Lambda CLI commands
+
+```bash
+# Test / run manually
+aws lambda invoke --function-name lastbottlewines /dev/stdout
+
+# View recent logs
+aws logs tail /aws/lambda/lastbottlewines --since 1h
+
+# Follow logs live
+aws logs tail /aws/lambda/lastbottlewines --follow
+
+# Check the schedule is active
+aws events describe-rule --name lastbottlewines-hourly
+
+# Pause the hourly schedule
+aws events disable-rule --name lastbottlewines-hourly
+
+# Resume it
+aws events enable-rule --name lastbottlewines-hourly
+
+# Update your user config after editing locally
+aws s3 cp data/user_configs/jason.yaml s3://lastbottlewines-data/user_configs/jason.yaml
+
+# Redeploy after code changes
+./deploy_lambda.sh
+```
+
 ## Project structure
 
 ```
