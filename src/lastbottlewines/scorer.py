@@ -3,6 +3,7 @@
 import re
 from typing import Optional, Dict
 import google.genai as genai
+from google.genai.types import GenerateContentConfig
 
 
 def score_wine(prompt: str) -> Optional[int]:
@@ -17,14 +18,17 @@ def score_wine(prompt: str) -> Optional[int]:
     """
     client = genai.Client()
     response = client.models.generate_content(
-        model="gemini-2.5-flash-lite", contents=prompt
+        model="gemini-2.5-flash-lite",
+        contents=prompt,
+        config=GenerateContentConfig(temperature=0.2),
     )
 
-    # Extract the score from the response
+    # The last line of the response should be the median score
     response_text = response.text.strip()
-    scores = re.findall(r"\b([0-9]{1,3})\b", response_text)
-    for score_str in scores:
-        score = int(score_str)
+    last_line = response_text.splitlines()[-1].strip()
+    match = re.search(r"\b(\d{1,3})\b", last_line)
+    if match:
+        score = int(match.group(1))
         if 0 <= score <= 100:
             return score
 
@@ -43,12 +47,10 @@ def generate_wine_scoring_prompt(wine_name: str, config: Dict) -> str:
     profile = config.get("profile", "").strip()
 
     # Build the prompt
-    prompt = f"""
-
-You are a wine expert evaluating a wine based on user preferences.
-Think deeply and critically about how well this wine matches the user's
-profile and preferences. Based on the following wine preferences, 
-evaluate and score a wine on a scale of 0-100.
+    prompt = f"""You are a wine expert evaluating a wine based on user preferences.
+Think carefully and critically about how well this wine matches the user's
+profile and preferences. Consider the grape variety, region, vintage,
+production style, and how these align with what the user is looking for.
 
 ## User Wine Preferences:
 
@@ -63,31 +65,29 @@ ${price_range[0] if price_range[0] else "Any"} - ${price_range[1] if price_range
 ## Type-Specific Price Ranges:
 {format_type_specific_ranges(type_specific_ranges) if type_specific_ranges else "None specified"}
 
-## Always a perfect score of 100 (regardless of other factors):
+## Always notify (if the wine contains any of these names, score 100):
 {", ".join(always_notify) if always_notify else "None specified"}
 
-## Always Avoid (Red Flags):
+## Always avoid (if the wine matches any of these categories, score 0):
 {", ".join(never_notify) if never_notify else "None specified"}
 
 ---
 
 ## Wine to Score:
 {wine_name}
-Please provide:
 
-1. A score from 0-100 based on how well this wine matches the user's preferences
-
-Scoring guidelines:
-- 90-100: Perfect match for preferences
-- 80-89: Excellent fit, highly recommended
-- 70-79: Good match, worth trying
-- 60-69: Acceptable but some concerns
-- 50-59: Mixed - some elements good, others not ideal
+## Scoring guidelines:
+- 90-100: Near-perfect match — wine type, style, region, and price all align
+- 80-89: Strong match — most preferences met, minor gaps
+- 70-79: Good match, worth considering
+- 60-69: Moderate — some preferences met, notable gaps
+- 50-59: Weak — few preferences met
 - 0-49: Poor match for preferences
 
-Return only the score as a integer number between 0, and 100, with
-no other text or explanation.
-"""
+## Instructions:
+1. Reason step by step about how well this wine matches the user's preferences.
+2. Produce 5 independent scores (do not output them).
+3. Output ONLY the median of those 5 scores as a single integer. No other text."""
 
     return prompt
 
