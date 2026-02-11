@@ -3,34 +3,53 @@
 # Copy this file and rename it (e.g. yourname.yaml) in this same directory.
 # Each YAML file here represents one user — the app scores wines for each user
 # independently based on their preferences.
+#
+# Values can be left empty:
+#   - Use null for no value:        price_range: null
+#   - Use [] for an empty list:     types: []
+#   - Use null in a list position:  price_range: [null, 200]  (no minimum)
+# 
 
-# Free-text description of your wine taste (sent to the LLM for scoring)
-profile: "I like bold reds and dry whites."
+# Contact info for notifications
+email: you@example.com
+
+# Overall price range [min, max] in dollars
+price_range: [Null, 200]
+
+# Minimum LLM score (0-100) to send an email alert
+score_minimum: 80
 
 # Wine types you're interested in
 types:
   - Cabernet Sauvignon
-  - Chardonnay
-
-# Overall price range [min, max] in dollars
-price_range: [20, 100]
+  - Merlot
+  - Chianti Classico
 
 # Optional per-type price overrides
 type_specific_price_ranges:
-  Cabernet Sauvignon: [30, 80]
-  Chardonnay: [20, 60]
+  Chianti Classico: [Null, 35]
+
+# Geographic regions you're interested in (e.g. Napa Valley, Tuscany)
+regions:
+  - Napa Valley
+  - Walla Walla Valley
+  - Tuscany
 
 # Wines that always trigger a notification regardless of score
 always_notify_for:
-  - "Opus One"
+  - Opus One
 
 # Wines that never trigger a notification regardless of score
 never_notify_for:
-  - "Yellow Tail"
+  - white wines
+  - sparkling wines
+  - champagne
 
-# Minimum LLM score (0-100) to send an email alert
-notify_threshold: 90
-
-# Contact info for notifications
-contact:
-  email: you@example.com
+# Free-text description of your wine taste (sent to the LLM for scoring)
+profile: >
+  I prefer structured, medium+ to full-bodied red wines with firm but
+  polished tannins and a smooth, rounded mid-palate. Favor Cabernet-dominant
+  blends or high-quality Merlot, as well as Chianti Classico Riserva or Gran
+  Selezione. Look for dark fruit (blackberry, cassis, dark cherry), integrated
+  oak (vanilla, cocoa, espresso), and strong but refined structure. Avoid thin
+  high-acid wines or overly jammy sweet styles. 
