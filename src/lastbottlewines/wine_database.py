@@ -131,10 +131,15 @@ class WineDatabase:
         row = cursor.fetchone()
         return dict(row) if row else None
     
-    def is_duplicate_wine(self, wine_name: str) -> bool:
-        """Check if wine_name matches the most recently recorded wine."""
-        latest = self.get_latest_wine()
-        return latest is not None and latest['wine_name'] == wine_name
+    def is_duplicate_wine(self, wine_name: str, days: int = 7) -> bool:
+        """Check if wine_name appears in the last N days of history."""
+        cursor = self.conn.cursor()
+        cursor.execute(
+            "SELECT 1 FROM wines WHERE wine_name = ? "
+            f"AND timestamp >= datetime('now', '-{days} days')",
+            (wine_name,),
+        )
+        return cursor.fetchone() is not None
     
     def get_wines_by_date_range(self, start_date: datetime, end_date: datetime) -> List[dict]:
         """Get all wines recorded within a date range."""

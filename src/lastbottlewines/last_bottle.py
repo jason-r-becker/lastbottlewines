@@ -32,7 +32,7 @@ def _load_dotenv():
                 continue
             key, _, value = line.partition("=")
             value = value.strip('"').strip("'")
-            os.environ.setdefault(key.strip(), value)
+            os.environ[key.strip()] = value
 
 
 def main():
@@ -56,9 +56,9 @@ def main():
 
     db = WineDatabase()
 
-    # Check if this wine is the same as the most recently recorded wine
+    # Skip if this wine was already scored in the last 7 days
     if db.is_duplicate_wine(wine_name):
-        logger.info("'%s' is the same as the most recent entry.", wine_name)
+        logger.info("'%s' already scored in the last 7 days, skipping.", wine_name)
         db.close()
         send_error_digest()
         return
@@ -73,6 +73,8 @@ def main():
 
     for config_path in user_configs_dir.glob("*.yaml"):
         user_id = config_path.stem
+        if user_id == 'template':
+            continue
 
         try:
             user_config = load_user_config(config_path)
