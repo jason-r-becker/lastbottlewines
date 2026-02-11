@@ -17,16 +17,9 @@ from pathlib import Path
 import pytest
 import yaml
 
-# Load .env before any imports that need it
-_env_path = Path(__file__).resolve().parent.parent / ".env"
-if _env_path.exists():
-    with open(_env_path) as f:
-        for line in f:
-            line = line.strip()
-            if not line or line.startswith("#"):
-                continue
-            key, _, value = line.partition("=")
-            os.environ[key.strip()] = value.strip('"').strip("'")
+# Use the app's own .env loader so tests use the same path as production
+from lastbottlewines.last_bottle import _load_dotenv
+_load_dotenv()
 
 from lastbottlewines.config import load_user_config, in_price_range
 from lastbottlewines.scorer import (
@@ -95,7 +88,37 @@ class TestConfig:
 
 
 # ---------------------------------------------------------------------------
-# 2. Prompt generation
+# 2. Environment loading
+# ---------------------------------------------------------------------------
+
+
+class TestEnv:
+    def test_env_file_exists(self):
+        env_path = Path(__file__).resolve().parent.parent / ".env"
+        assert env_path.exists(), ".env file not found — copy from .env.example"
+
+    def test_google_api_key_loaded(self):
+        val = os.environ.get("GOOGLE_API_KEY", "")
+        assert val and not val.startswith("your-"), "GOOGLE_API_KEY not set or still a placeholder"
+
+    def test_smtp_user_loaded(self):
+        val = os.environ.get("SMTP_USER", "")
+        assert val and "@" in val, "SMTP_USER not set or invalid"
+
+    def test_smtp_pass_loaded(self):
+        val = os.environ.get("SMTP_PASS", "")
+        assert val and not val.startswith("your-"), "SMTP_PASS not set or still a placeholder"
+
+    def test_smtp_host_loaded(self):
+        assert os.environ.get("SMTP_HOST"), "SMTP_HOST not set"
+
+    def test_smtp_port_loaded(self):
+        port = os.environ.get("SMTP_PORT", "")
+        assert port.isdigit(), f"SMTP_PORT not set or invalid: {port!r}"
+
+
+# ---------------------------------------------------------------------------
+# 3. Prompt generation
 # ---------------------------------------------------------------------------
 
 
@@ -173,7 +196,9 @@ class TestGeminiScoring:
         prompt = generate_wine_scoring_prompt("Opus One", config)
         score = score_wine(prompt)
         assert score is not None
-        assert score == 100, f"Expected 100 for always-notify wine, got {score}"
+        assert score == 100, (
+            f"Expected 100 for always-notify wine, got {score}"
+        )
 
     @pytest.mark.skipif(
         not os.environ.get("GOOGLE_API_KEY"),
@@ -182,7 +207,9 @@ class TestGeminiScoring:
     @pytest.mark.network
     def test_never_notify_wine_scores_low(self, config):
         """Yellow Tail is in never_notify — should score low."""
-        prompt = generate_wine_scoring_prompt("Yellow Tail Reserve Shiraz", config)
+        prompt = generate_wine_scoring_prompt(
+            "Yellow Tail Reserve Shiraz", config
+        )
         score = score_wine(prompt)
         assert score is not None
         assert score < 50, f"Expected <50 for never-notify wine, got {score}"
