@@ -97,6 +97,6 @@ def sync_data_from_s3(data_dir: Path) -> None:
 def sync_data_to_s3(data_dir: Path) -> None:
     """Push wines.db and logs/ back to S3 after a run."""
     upload_file(data_dir / "wines.db", "wines.db")
-    upload_file(
-        data_dir / "logs" / "error_buffer.json", "logs/error_buffer.json"
-    )
+    error_buffer = data_dir / "logs" / "error_buffer.json"
+    if error_buffer.exists():
+        upload_file(error_buffer, "logs/error_buffer.json")
