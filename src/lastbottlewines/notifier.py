@@ -78,7 +78,7 @@ def notify_user(
     )
 
     try:
-        email = contact.get("email")
+        email = config.get("email") or contact.get("email")
         if not email:
             raise ValueError("Email method requires `email` in contact config")
         _send_email(email, subject, body)

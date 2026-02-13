@@ -35,12 +35,16 @@ def _load_dotenv():
             os.environ[key.strip()] = value
 
 
-def main():
+def main(force_notify: bool = False):
     """
     Main orchestration function.
 
     Scrapes the current wine, evaluates it against user preferences,
     scores it, and records everything in the database.
+
+    Args:
+        force_notify: If True, skip duplicate check and always send
+                      notifications regardless of score. Useful for testing.
     """
     _load_dotenv()
     timestamp = datetime.now(timezone.utc)
@@ -57,7 +61,7 @@ def main():
     db = WineDatabase()
 
     # Skip if this wine was already scored in the last 7 days
-    if db.is_duplicate_wine(wine_name):
+    if not force_notify and db.is_duplicate_wine(wine_name):
         logger.info("'%s' already scored in the last 7 days, skipping.", wine_name)
         db.close()
         send_error_digest()
@@ -100,7 +104,7 @@ def main():
         db.add_user_score(user_id, wine_id, score, timestamp=timestamp)
 
         # Determine whether to notify the user
-        notify_threshold = user_config.get("notify_threshold")
+        notify_threshold = user_config.get("score_minimum")
         always_notify = user_config.get("always_notify_for", [])
         should_notify = False
 
@@ -110,7 +114,7 @@ def main():
             if score >= notify_threshold:
                 should_notify = True
 
-        if should_notify:
+        if force_notify or should_notify:
             try:
                 notify_user(user_config, wine_name, score, price)
                 logger.info("Notification sent to %s for %s", user_id, wine_name)
@@ -122,4 +126,5 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    import sys
+    main(force_notify="--force-notify" in sys.argv)
