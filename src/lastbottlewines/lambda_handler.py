@@ -37,7 +37,8 @@ def handler(event, context):
         sync_data_from_s3(tmp_data)
 
         # Run the pipeline
-        main()
+        force_notify = event.get("force_notify", False) if isinstance(event, dict) else False
+        main(force_notify=force_notify)
 
     finally:
         # Always push state back, even if main() errored

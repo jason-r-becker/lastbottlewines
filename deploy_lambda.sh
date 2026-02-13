@@ -63,7 +63,7 @@ ZIP_FILE="/tmp/lastbottlewines-lambda.zip"
 echo "==> Building deployment package"
 rm -rf "$BUILD_DIR" "$ZIP_FILE"
 mkdir -p "$BUILD_DIR"
-pip install --target "$BUILD_DIR" --platform manylinux2014_x86_64 --only-binary=:all: ".[lambda]"
+pip install --target "$BUILD_DIR" --platform manylinux2014_x86_64 --python-version 3.12 --only-binary=:all: ".[lambda]"
 cd "$BUILD_DIR" && zip -rq "$ZIP_FILE" . -x '*.pyc' '__pycache__/*'
 
 # --- Deploy ---
